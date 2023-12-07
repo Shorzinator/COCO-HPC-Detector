@@ -1,0 +1,39 @@
+object_detection_project/
+│
+├── dataset/
+│   ├── coco/
+│   │   ├── annotations/
+│   │   ├── images/
+│   │   │   ├── train2017/
+│   │   │   ├── val2017/
+│   │   │   └── test2017/
+│   │   └── ...
+│   └── processed_data/
+│       ├── train/
+│       ├── validate/
+│       └── test/
+│
+├── models/
+│   ├── pretrained_models/
+│   └── trained_models/
+│
+├── src/
+│   ├── data_preprocessing/
+│   │   ├── preprocess.py
+│   │   └── augmentations.py
+│   ├── model/
+│   │   ├── network.py
+│   │   ├── train.py
+│   │   ├── evaluate.py
+│   │   └── utils.py
+│   ├── config/
+│   │   └── config.py
+│   ├── visualization/
+│   │   └── visualize.py
+│   └── main.py
+│
+├── notebooks/
+│   └── exploratory_data_analysis.ipynb
+│
+├── requirements.txt
+└── README.md
