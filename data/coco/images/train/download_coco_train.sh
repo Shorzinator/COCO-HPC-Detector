@@ -16,6 +16,8 @@ download_and_unzip() {
     # Unzip
     echo "Unzipping the dataset"
     unzip "$zip_file"
+
+    # Removing zip file
     rm "$zip_file"  # Remove the zip file after extraction
     echo "Download and extraction complete."
 }
