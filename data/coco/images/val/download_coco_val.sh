@@ -1,28 +1,19 @@
 #!/bin/bash
 
-# Define the URL for the COCO train dataset
+# Define the URl from where the validation dat is being downloaded
 dataset_url="http://images.cocodataset.org/zips/val2014.zip"
 
-# Function to download and unzip data
-download_and_unzip() {
-    local url=$1
-    # shellcheck disable=SC2155
-    local zip_file=$(basename "$url")
-
-    # Download
-    echo "Downloading data from $url"
-    wget "$url"
-
-    # Unzip
-    echo "Unzipping the dataset"
-    unzip "$zip_file"
-
-    # Removing zip file
-    rm "$zip_file"  # Remove the zip file after extraction
-    echo "Download and extraction complete."
+# Function to download data
+download_data() {
+	local url=$1
+	
+	# Download
+	echo "Downloading data from $url"
+	wget $url
+	echo "val Download complete."
 }
 
-# Download and unzip the dataset in the current directory
-download_and_unzip $dataset_url
+# Download the dataset zip file
+download_data $dataset_url
 
-echo "Dataset setup complete."
+echo "Dataset zip file downloaded."
