@@ -1,0 +1,6 @@
+numpy~=1.26.2
+Pillow~=10.1.0
+
+matplotlib~=3.8.2
+seaborn
+pycocotools~=2.0.7

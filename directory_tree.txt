@@ -1,39 +1,32 @@
-object_detection_project/
-│
-├── dataset/
-│   ├── coco/
-│   │   ├── annotations/
-│   │   ├── images/
-│   │   │   ├── train2017/
-│   │   │   ├── val2017/
-│   │   │   └── test2017/
-│   │   └── ...
-│   └── processed_data/
-│       ├── train/
-│       ├── validate/
-│       └── test/
-│
-├── models/
-│   ├── pretrained_models/
-│   └── trained_models/
-│
-├── src/
-│   ├── data_preprocessing/
-│   │   ├── preprocess.py
-│   │   └── augmentations.py
-│   ├── model/
-│   │   ├── network.py
-│   │   ├── train.py
-│   │   ├── evaluate.py
-│   │   └── utils.py
-│   ├── config/
-│   │   └── config.py
-│   ├── visualization/
-│   │   └── visualize.py
-│   └── main.py
-│
-├── notebooks/
-│   └── exploratory_data_analysis.ipynb
-│
-├── requirements.txt
-└── README.md
+data\coco\annotations\test\image_info_test2014.json
+data\coco\annotations\train&val\captions_train2014.json
+data\coco\annotations\train&val\captions_val2014.json
+data\coco\annotations\train&val\instances_train2014.json
+data\coco\annotations\train&val\instances_val2014.json
+data\coco\annotations\train&val\person_keypoints_train2014.json
+data\coco\annotations\train&val\person_keypoints_val2014.json
+data\coco\images\test\download_coco_test.sh
+data\coco\images\test\README.md
+data\coco\images\train\download_coco_train.sh
+data\coco\images\train\README.md
+data\coco\images\val\download_coco_val.sh
+data\coco\images\val\README.md
+data\extra_data\COCO_val2014_000000037149.jpg
+data\extra_data\COCO_val2014_000000186147.jpg
+data\extra_data\COCO_val2014_000000230593.jpg
+data\extra_data\COCO_val2014_000000284743.jpg
+data\extra_data\COCO_val2014_000000324670.jpg
+data\extra_data\COCO_val2014_000000464263.jpg
+data\extra_data\COCO_val2014_000000526418.jpg
+notebooks\data_input.ipynb
+notebooks\testing.ipynb
+shell_scripts\setup_coco_dataset.sh
+src\main.py
+src\modeling\evaluate.py
+src\modeling\train.py
+src\modeling\utils.py
+src\preprocessing\augmentations.py
+src\preprocessing\preprocess.py
+src\test_files\testing_data_loader.py
+src\utility\data_loader.py
+src\utility\path_utils.py
