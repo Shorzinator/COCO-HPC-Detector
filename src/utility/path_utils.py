@@ -12,13 +12,3 @@ def get_path_from_root(*subdirs):
     """
     return os.path.join(ROOT_DIR, *subdirs)
 
-
-def get_raw_data_path(filename):
-    """
-    Get the full path to the raw data files.
-
-    :param filename: Name of the data file
-    :return: path to the data file based on input
-    """
-
-    return get_path_from_root("data", "raw", filename)
