@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Define the URL for the COCO dataset

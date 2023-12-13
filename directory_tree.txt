@@ -31,5 +31,7 @@ src\modeling\utils.py
 src\preprocessing\augmentations.py
 src\preprocessing\preprocess.py
 src\test_files\testing_data_loader.py
+src\test_files\test_preprocess4.py
+src\test_files\test_processing_local.py
 src\utility\data_loader.py
 src\utility\path_utils.py

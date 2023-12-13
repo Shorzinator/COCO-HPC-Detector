@@ -1,6 +1,6 @@
 from matplotlib import patches, pyplot as plt
 
-from src.utility.data_loader import load_coco_data
+from src.utility.data_loader import load_coco_data, load_coco_data_custom
 from src.utility.path_utils import get_path_from_root
 
 
@@ -27,9 +27,10 @@ def main():
     captions_ann_file = get_path_from_root("data", "coco", "annotations", "train&val", "captions_val2014.json")
 
     # Load the data
-    # sample_data = load_coco_data(image_dir, instances_ann_file, keypoints_ann_file, captions_ann_file)
+    # sample_data = load_coco_data_custom(image_dir, instances_ann_file, keypoints_ann_file, captions_ann_file)
     sample_data = load_coco_data(image_dir, instances_ann_file)
 
+    print("sample data:", sample_data)
     # Print out some basic information to check if data is loaded correctly
     for image_data, annotations in sample_data:
         image_instances = [ann for ann in annotations if 'bbox' in ann]

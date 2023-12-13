@@ -3,17 +3,16 @@ import os
 import numpy as np
 from PIL import Image
 from pycocotools.coco import COCO
-from scipy.ndimage import binary_dilation, binary_erosion, gaussian_filter
 from tensorflow import keras
 
 from src.utility.path_utils import get_path_from_root
 
 # Constants
-ANNOTATION_FILE_TRAIN = get_path_from_root('path/to/instances_train2014.json')
-ANNOTATION_FILE_VAL = get_path_from_root('path/to/instances_val2014.json')
-IMAGE_DIR = get_path_from_root('path/to/images')
-MASK_DIR_TRAIN = get_path_from_root('path/to/mask_train_2014')
-MASK_DIR_VAL = get_path_from_root('path/to/mask_val_2014')
+ANNOTATION_FILE_TRAIN = get_path_from_root("data", "coco", "annotations", "train&val", "instances_train2014.json")
+ANNOTATION_FILE_VAL = get_path_from_root("data", "coco", "annotations", "train&val", "instances_val2014.json")
+IMAGE_DIR = get_path_from_root("data", "coco", "images", "train")
+MASK_DIR_TRAIN = get_path_from_root("data", "mask", "train")
+MASK_DIR_VAL = get_path_from_root("data", "mask", "val")
 TARGET_SIZE = (128, 128)  # Example target size for resizing images and masks
 
 # Initialize COCO API
@@ -28,40 +27,42 @@ def filter_images(coco, category_names):
     return imgIds
 
 
-# Function to generate and save masks
 def generate_masks(coco, imgIds, mask_dir, image_dir, category_names):
+    # Ensure the mask directory exists
+    os.makedirs(mask_dir, exist_ok=True)
+
     for img_id in imgIds:
+        # Set the file path for the mask
+        mask_file = os.path.join(mask_dir, f"COCO_train2014_{img_id:012d}.jpg")
+
         annIds = coco.getAnnIds(imgIds=img_id, catIds=coco.getCatIds(catNms=category_names), iscrowd=0)
         anns = coco.loadAnns(annIds)
+
         if anns:
-            mask = np.zeros((coco.loadImgs(img_id)[0]['height'], coco.loadImgs(img_id)[0]['width']), dtype=np.uint8)
-            for ann in anns:
-                mask = mask | coco.annToMask(ann)
+            # Generate the mask by combining the individual instance masks
+            mask = coco.annToMask(anns[0])
+            for i in range(1, len(anns)):
+                mask |= coco.annToMask(anns[i])
+
+            # Convert the mask to an image and save it
             mask_img = Image.fromarray(mask * 255, mode='L')
-            mask_img.save(os.path.join(mask_dir, f"COCO_{coco.dataset['images'][img_id]['file_name']}"))
+            mask_img = mask_img.resize(TARGET_SIZE)
+            mask_img.save(mask_file)
 
             # Process and save the corresponding image
             img_info = coco.loadImgs(img_id)[0]
             img_path = os.path.join(image_dir, img_info['file_name'])
             image = Image.open(img_path)
             resized_image = image.resize(TARGET_SIZE)
-            resized_image.save(os.path.join(image_dir, img_info['file_name']))  # Saving resized image
+            resized_image.save(os.path.join(image_dir, f"COCO_train2014_{img_id:012d}.jpg"))
 
 
-# Function to apply transformations to masks
-def transform_mask(mask):
-    eroded_mask = binary_erosion(mask)
-    dilated_mask = binary_dilation(mask)
-    smoothed_mask = gaussian_filter(mask, sigma=0.2)
-    return eroded_mask, dilated_mask, smoothed_mask
-
-
-# Custom Data Generator for on-the-fly processing
 class CustomDataGenerator(keras.utils.Sequence):
-    def __init__(self, coco, imgIds, images_path, batch_size):
+    def __init__(self, coco, imgIds, images_path, masks_path, batch_size):
         self.coco = coco
-        self.imgIds = imgIds  # List of image IDs to use
+        self.imgIds = imgIds
         self.images_path = images_path
+        self.masks_path = masks_path
         self.batch_size = batch_size
 
     def __len__(self):
@@ -73,19 +74,15 @@ class CustomDataGenerator(keras.utils.Sequence):
         batch_masks = []
 
         for img_id in batch_imgIds:
-            img_info = self.coco.loadImgs(img_id)[0]
-            img_path = os.path.join(self.images_path, img_info['file_name'])
-            image = Image.open(img_path).resize(TARGET_SIZE)
+            image_filename = f"COCO_train2014_{img_id:012d}.jpg"
+            img_path = os.path.join(self.images_path, image_filename)
+            mask_path = os.path.join(self.masks_path, image_filename)
 
-            # Generate mask for the image
-            annIds = self.coco.getAnnIds(imgIds=img_id)
-            anns = self.coco.loadAnns(annIds)
-            mask = np.zeros((TARGET_SIZE[1], TARGET_SIZE[0]), dtype=np.uint8)
-            for ann in anns:
-                mask |= self.coco.annToMask(ann).astype(np.uint8)
+            image = Image.open(img_path).resize(TARGET_SIZE)
+            mask = Image.open(mask_path).resize(TARGET_SIZE)
 
             batch_images.append(np.array(image) / 255.0)
-            batch_masks.append(mask)
+            batch_masks.append(np.array(mask) / 255.0)
 
         return np.array(batch_images), np.array(batch_masks)
 
@@ -111,9 +108,22 @@ def validate_images_and_masks(generator):
 if __name__ == "__main__":
     train_imgIds = filter_images(coco_train, ['person'])
     val_imgIds = filter_images(coco_val, ['person'])
+
+    # Ensure mask directories exist
+    os.makedirs(MASK_DIR_TRAIN, exist_ok=True)
+    os.makedirs(MASK_DIR_VAL, exist_ok=True)
+
+    # Generate masks for training and validation sets
     generate_masks(coco_train, train_imgIds, MASK_DIR_TRAIN, IMAGE_DIR, ['person'])
     generate_masks(coco_val, val_imgIds, MASK_DIR_VAL, IMAGE_DIR, ['person'])
-    train_generator = CustomDataGenerator(IMAGE_DIR, MASK_DIR_TRAIN, batch_size=8)
-    val_generator = CustomDataGenerator(IMAGE_DIR, MASK_DIR_VAL, batch_size=8)
 
+    # Initialize the data generators
+    train_generator = CustomDataGenerator(coco_train, train_imgIds, IMAGE_DIR, MASK_DIR_TRAIN, batch_size=8)
+    val_generator = CustomDataGenerator(coco_val, val_imgIds, IMAGE_DIR, MASK_DIR_VAL, batch_size=8)
+
+    # Validate the shapes and alignment of preprocessed images and masks
+    print("Validating Training Data...")
     validate_images_and_masks(train_generator)
+
+    print("Validating Validation Data...")
+    validate_images_and_masks(val_generator)
